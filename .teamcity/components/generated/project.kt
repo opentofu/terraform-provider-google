@@ -18,10 +18,6 @@ fun Google(environment: String, projDescription: String, manualVcsRoot: Absolute
     val allPackages = packages + services
     val packageConfigs = buildConfigurationsForPackages(allPackages, providerName, environment, manualVcsRoot, configuration)
 
-    // Create build configs for sweepers
-    val preSweeperConfig = buildConfigurationForSweeper("Pre-Sweeper", sweepers, providerName, manualVcsRoot, configuration)
-    val postSweeperConfig = buildConfigurationForSweeper("Post-Sweeper", sweepers, providerName, manualVcsRoot, configuration)
-
     // Add trigger to last step of build chain (post-sweeper) if the project allows
     if (ShouldAddTrigger(environment)){
         val triggerConfig = NightlyTriggerConfiguration(environment, branchRef)
@@ -33,11 +29,9 @@ fun Google(environment: String, projDescription: String, manualVcsRoot: Absolute
         description = projDescription
 
         // Register build configs in the project
-        buildType(preSweeperConfig)
         packageConfigs.forEach { buildConfiguration ->
             buildType(buildConfiguration)
         }
-        buildType(postSweeperConfig)
 
         // Set up dependencies between builds using `sequential` block
         // Acc test builds run in parallel
