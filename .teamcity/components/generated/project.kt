@@ -18,11 +18,6 @@ fun Google(environment: String, projDescription: String, manualVcsRoot: Absolute
     val allPackages = packages + services
     val packageConfigs = buildConfigurationsForPackages(allPackages, providerName, environment, manualVcsRoot, configuration)
 
-    // Add trigger to last step of build chain (post-sweeper) if the project allows
-    if (ShouldAddTrigger(environment)){
-        val triggerConfig = NightlyTriggerConfiguration(environment, branchRef)
-        postSweeperConfig.addTrigger(triggerConfig)
-    }
 
     return Project{
 
@@ -36,15 +31,12 @@ fun Google(environment: String, projDescription: String, manualVcsRoot: Absolute
         // Set up dependencies between builds using `sequential` block
         // Acc test builds run in parallel
         sequential {
-            buildType(preSweeperConfig)
 
             parallel{
                 packageConfigs.forEach { buildConfiguration ->
                     buildType(buildConfiguration)
                 }
             }
-
-            buildType(postSweeperConfig)
         }
 
         // Set the configuration parameter BRANCH_NAME in the project, used to control the default branch of the VCS Root
